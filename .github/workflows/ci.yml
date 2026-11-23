@@ -1,0 +1,18 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  cpu-emulator:              # runs every kernel on the CPU emulator and checks the results
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: g++ --version
+      - run: make test-cpu
+  nvcc-build:                # compiles the real CUDA build (no GPU on hosted runners, so nothing runs)
+    runs-on: ubuntu-22.04
+    container: nvidia/cuda:12.4.1-devel-ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: apt-get update && apt-get install -y --no-install-recommends make
+      - run: nvcc --version
+      - run: make gpu ARCH=sm_75
+      - run: make gpu ARCH=sm_80 -B
